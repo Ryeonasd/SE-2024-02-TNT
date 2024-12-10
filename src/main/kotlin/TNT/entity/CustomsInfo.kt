@@ -1,22 +1,29 @@
 package TNT.entity
+
 import jakarta.persistence.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+
 @Entity
-@Table(name = "customs_info")
-data class CustomsInfo(
+open class CustomsInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Column(name = "customs_id", nullable = false, length = 50)
+    open var customsId: String? = null
 
-    @Column(nullable = false)
-    val dutyAmount: Int, // 관세 금액
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "order_number")
+    open var orderNumber: Order? = null
 
-    @Column(nullable = false)
-    val ftaApplicable: Boolean, // FTA 혜택 여부
+    @Column(name = "duty_amount")
+    open var dutyAmount: Double? = null
 
-    @Column(nullable = false)
-    val customsDeclarationNumber: String // 통관 신고 번호
-) {
-    constructor() : this(0, 0, false, "") {
+    @Column(name = "fta_applicable")
+    open var ftaApplicable: Boolean? = null
 
-    }
+    @Column(name = "payment_method", length = 50)
+    open var paymentMethod: String? = null
+
+    @Column(name = "customs_declaration_number", length = 50)
+    open var customsDeclarationNumber: String? = null
 }

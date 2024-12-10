@@ -1,44 +1,45 @@
 package TNT.entity
+
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "orders")
-data class Order(
+@Table(name = "Orders")
+open class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Column(name = "order_id", nullable = false, length = 50)
+    open var orderId: String? = null
 
-    @Column(nullable = false, unique = true)
-    val orderNumber: String, // 주문 번호
+    @Column(name = "tracking_number", nullable = false, length = 50)
+    open var trackingNumber: String? = null
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "shipping_info_id", referencedColumnName = "id")
-    val shippingInfo: ShippingInfo, // 배송 정보
+    @Column(name = "container_number", length = 50)
+    open var containerNumber: String? = null
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
-    val sender: ShippingParticipant, // 발송인
+    @Lob
+    @Column(name = "relay")
+    open var relay: String? = null
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_id", nullable = false)
-    val receiver: ShippingParticipant, // 수취인
+    @OneToMany(mappedBy = "order")
+    open var airWaybills: MutableSet<AirWaybill> = mutableSetOf()
 
-    @OneToMany(mappedBy = "order", cascade = [CascadeType.ALL])
-    val items: List<Item> = emptyList(), // 물품 정보 목록
+    @OneToMany(mappedBy = "order")
+    open var billOfLadings: MutableSet<BillOfLading> = mutableSetOf()
 
-    @Column(nullable = false)
-    val trackingNumber: String, // 운송장 번호
+    @OneToMany(mappedBy = "idOrder")
+    open var contacts: MutableSet<Contact> = mutableSetOf()
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "insurance_info_id", referencedColumnName = "id")
-    val insuranceInfo: InsuranceInfo?, // 보험 정보
+    @OneToMany(mappedBy = "order")
+    open var containers: MutableSet<Container> = mutableSetOf()
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "customs_info_id", referencedColumnName = "id")
-    val customsInfo: CustomsInfo? // 관세 정보
-) {
-    constructor() : this(0, "", ShippingInfo(), ShippingParticipant(), ShippingParticipant(), emptyList(), "", null, null) {
+    @OneToMany(mappedBy = "orderNumber")
+    open var customsInfos: MutableSet<CustomsInfo> = mutableSetOf()
 
-    }
+    @OneToMany(mappedBy = "order")
+    open var insuranceInfos: MutableSet<InsuranceInfo> = mutableSetOf()
+
+    @OneToMany(mappedBy = "order")
+    open var shipmentStatuses: MutableSet<ShipmentStatus> = mutableSetOf()
+
+    @OneToMany(mappedBy = "idOdr")
+    open var couplingOrdTrs: MutableSet<CouplingOrdTr> = mutableSetOf()
 }
-

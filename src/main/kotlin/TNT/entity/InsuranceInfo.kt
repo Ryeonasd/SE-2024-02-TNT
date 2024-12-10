@@ -1,27 +1,39 @@
 package TNT.entity
+
 import jakarta.persistence.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import java.time.LocalDate
 
-// 보험 정보 엔티티
 @Entity
-@Table(name = "insurance_info")
-data class InsuranceInfo(
+open class InsuranceInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Column(name = "insurance_id", nullable = false, length = 50)
+    open var insuranceId: String? = null
 
-    @Column(nullable = false)
-    val company: String, // 보험사 이름
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "order_id")
+    open var order: Order? = null
 
-    @Column(nullable = false)
-    val policyNumber: String, // 보험 번호
+    @Column(name = "company", length = 100)
+    open var company: String? = null
 
-    @Column(nullable = false)
-    val coverageAmount: Int, // 보장 금액
+    @Column(name = "policy_number", length = 50)
+    open var policyNumber: String? = null
 
-    @Column(nullable = false)
-    val premium: Int // 보험료
-) {
-    constructor() : this(0, "", "", 0, 0) {
+    @Column(name = "coverage_amount")
+    open var coverageAmount: Double? = null
 
-    }
+    @Column(name = "coverage_scope")
+    open var coverageScope: String? = null
+
+    @Column(name = "start_date")
+    open var startDate: LocalDate? = null
+
+    @Column(name = "end_date")
+    open var endDate: LocalDate? = null
+
+    @Column(name = "premium")
+    open var premium: Double? = null
 }

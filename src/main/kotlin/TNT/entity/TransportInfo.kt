@@ -1,31 +1,37 @@
 package TNT.entity
+
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
+import java.time.Instant
 
 @Entity
-@Table(name = "transport_info")
-data class TransportInfo(
+open class TransportInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    @Column(name = "tracking_number", nullable = false, length = 50)
+    open var trackingNumber: String? = null
 
-    @Column(nullable = false)
-    val relay: RelayType, // 배송 경로
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "container_id")
+    open var container: Container? = null
 
-    @Column(nullable = false)
-    val pickupTime: LocalDateTime, // 픽업 시간
+    @Column(name = "origin_address", length = 20)
+    open var originAddress: String? = null
 
-    @Column(nullable = false)
-    val estimatedArrivalTime: LocalDateTime, // 예상 도착 시간
+    @Column(name = "destination_address", length = 20)
+    open var destinationAddress: String? = null
 
-    @Column(nullable = false)
-    val currentLocation: String // 현재 위치
-) {
-    constructor() : this(0, RelayType.NONE, LocalDateTime.now(), LocalDateTime.now(), "") {
+    @Column(name = "pickup_time")
+    open var pickupTime: Instant? = null
 
-    }
-}
+    @Column(name = "estimated_arrival_time")
+    open var estimatedArrivalTime: Instant? = null
 
-enum class RelayType {
-    OCEAN, AIRLINE, PARCEL, LAND, NONE
+    @Lob
+    @Column(name = "type")
+    open var type: String? = null
+
+    @OneToOne(mappedBy = "trackingNumber")
+    open var item: Item? = null
 }
