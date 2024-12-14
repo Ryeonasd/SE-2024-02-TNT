@@ -1,4 +1,4 @@
-package TNT.entity
+package TNT.SE_2024_02_TNT.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
