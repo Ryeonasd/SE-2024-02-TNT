@@ -9,11 +9,6 @@ open class Item {
     @Column(name = "tracking_number", nullable = false, length = 50)
     open var trackingNumber: String? = null
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tracking_number", nullable = false)
-    open var transportInfo: TransportInfo? = null
-
     @Column(name = "name", nullable = false, length = 100)
     open var name: String? = null
 

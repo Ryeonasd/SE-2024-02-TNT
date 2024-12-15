@@ -31,7 +31,4 @@ open class TransportInfo {
     @Lob
     @Column(name = "type")
     open var type: String? = null
-
-    @OneToOne(mappedBy = "trackingNumber")
-    open var item: Item? = null
 }
