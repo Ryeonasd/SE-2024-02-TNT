@@ -1,6 +1,7 @@
 package TNT.SE_2024_02_TNT.entity
 
 import jakarta.persistence.*
+import java.time.Instant
 
 @Entity
 open class OrderTPInfo {
@@ -28,6 +29,14 @@ open class OrderTPInfo {
     @Column(name = "address_depart", nullable = false)
     open var addressDepart: String? = null
 
+    @Column(name = "pickup_time")
+    open var pickupTime: Instant? = null
+
+    @Column(name = "estimated_arrival_time")
+    open var estimatedArrivalTime: Instant? = null
+
     @OneToMany(mappedBy = "idTr")
     open var couplingOrdTrs: MutableSet<CouplingOrdTr> = mutableSetOf()
+
+
 }
