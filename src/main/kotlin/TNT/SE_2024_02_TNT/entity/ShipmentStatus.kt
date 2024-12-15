@@ -29,4 +29,8 @@ open class ShipmentStatus {
     @Lob
     @Column(name = "remarks")
     open var remarks: String? = null
+
+    @Lob
+    @Column(name = "transport_vehicle_number")
+    open var transportVehicleNum:String? =null
 }
