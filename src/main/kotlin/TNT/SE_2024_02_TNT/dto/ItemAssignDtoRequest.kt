@@ -39,9 +39,9 @@ data class ItemDto(
 )
 
 data class ItemTransportInfo(
-    val tracking_number: String?,
-    val origin_address: String?,
-    val destination_address: String?,
-    val pickup_time: Instant?,
-    val estimated_arrival_time: Instant?
+    val trackingNumber: String?,
+    val originAddress: String?,
+    val destinationAddress: String?,
+    val pickupTime: Instant?,
+    val estimatedArrivalTime: Instant?
 )

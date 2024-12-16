@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository
 interface ItemRepository : JpaRepository<Item, String> {
     fun findByTrackingNumber(trackingNumber: String) : Item?
     fun deleteByTrackingNumber(trackingNumber: String)
+    abstract fun findByContainer(container: Container): MutableList<Item>
 }

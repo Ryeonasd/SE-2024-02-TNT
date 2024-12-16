@@ -13,7 +13,7 @@ class ItemController(
     @PostMapping("/add")
     fun addItems(@RequestBody request: ItemAssignDtoRequest): ResponseEntity<Any> {
         itemService.addItemsToContainer(request)
-        return ResponseEntity.ok(mapOf("message" to "저장 성공", "current_status" to "운송 준비 중"))
+        return ResponseEntity.ok(mapOf("message" to "저장 성공"))
     }
 
     @PostMapping("/pop")

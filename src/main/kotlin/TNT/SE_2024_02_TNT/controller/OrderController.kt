@@ -1,9 +1,7 @@
 package TNT.SE_2024_02_TNT.controller
 
 import TNT.SE_2024_02_TNT.dto.*
-import TNT.SE_2024_02_TNT.entity.*
 import TNT.SE_2024_02_TNT.service.OrderService
-import jakarta.servlet.http.HttpSession
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -12,8 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
@@ -73,15 +69,15 @@ class OrderController(var orderService: OrderService) {
         }
     }
 
-//    @GetMapping("/detail")
-//    fun getOrderDetails(@RequestParam orderId: String): ResponseEntity<OrderDetailDto> {
-//        val orderDetails = orderService.getOrderDetails(orderId)
-//        return if (orderDetails != null) {
-//            ResponseEntity.ok(orderDetails)
-//        } else {
-//            ResponseEntity.notFound().build()
-//        }
-//    }
+    @GetMapping("/detail")
+    fun getOrderDetails(@RequestParam orderId: String): ResponseEntity<OrderDetailDto> {
+        val orderDetails = orderService.getOrderDetails(orderId)
+        return if (orderDetails != null) {
+            ResponseEntity.ok(orderDetails)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
 
     // 운송 현황 가져 오기 (GET 요청)
     @GetMapping("/statuslist")
@@ -113,25 +109,21 @@ class OrderController(var orderService: OrderService) {
 
     // 운송 현황 업데이트 (POST 요청)
     @PostMapping("/update")
-    fun updateDeliveryStatus(@RequestBody request: Map<String, Any>): ResponseEntity<Map<String, String>> {
+    fun updateDeliveryStatus(@RequestBody request: ShipmentStatusDtoSearch):ResponseEntity<Map<String, String>> {
         return try {
-            // 요청값 파싱
-            val currentStatus = request["current_status"] as? String ?: "processing"
-            val lastUpdated = request["last_updated"] as? String ?: throw IllegalArgumentException("last_updated는 필수입니다.")
-            val remarks = request["remarks"] as? String ?: ""
-            val transportId = request["transport_vehicle_num"] as? String ?: throw IllegalArgumentException("배송수단 관련한 id값은 필수입니다.")
+            val orderId = request.order_id ?: throw IllegalArgumentException("order_id는 필수입니다.")
 
             // 서비스에서 데이터 업데이트
-            orderService.updateShipmentStatus(currentStatus, lastUpdated, remarks, transportId)
+            orderService.updateShipmentStatus(request)
 
+            
             ResponseEntity.status(HttpStatus.CREATED).body(
-                mapOf("message" to "잘됨.")
+                mapOf("message" to "운송 현황 업데이트 성공")
             )
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                mapOf("message" to "잘안됨: ${e.message}")
+                mapOf("message" to "운송 현황 업데이트 실패: ${e.message}")
             )
         }
     }
-
 }

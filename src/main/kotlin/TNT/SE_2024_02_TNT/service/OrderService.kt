@@ -4,6 +4,7 @@ import TNT.SE_2024_02_TNT.dto.*
 import TNT.SE_2024_02_TNT.entity.*
 import TNT.SE_2024_02_TNT.repository.*
 import jakarta.transaction.Transactional
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -12,11 +13,15 @@ import java.time.Instant
 class OrderService(
     val orderRepository: OrderRepository,
     val contactRepository: ContactRepository,
+    val couplingOrdTrRepository: CouplingOrdTrRepository,
     val containerRepository: ContainerRepository,
     val shipmentStatusRepository: ShipmentStatusRepository,
     val orderTPInfoRepository: OrderTPInfoRepository,
     val transportInfoRepository:TransportInfoRepository,
-    val itemRepository: ItemRepository
+    val itemRepository: ItemRepository,
+    val insurenceRepository: InsurenceRepository,
+    val customsInfoRepository: CustomInfoRepository,
+
 ) {
     fun getAllOrderList(): List<OrderDtoSearch> {
         return orderRepository.findAll().map { order ->
@@ -35,16 +40,6 @@ class OrderService(
 
     @Transactional
     fun createOrder(request: OrderDtoRequest): OrderCreateResponseDto {
-        // Order 엔티티 생성 및 저장
-        val order = Order(
-            orderId = request.order_id,
-            trackingNumber = request.order_info.tracking_number,
-            containerNumber = request.container_id,
-            relay = request.relay
-        )
-        orderRepository.save(order)
-
-        // OrderTPInfo 엔티티 생성 및 저장
         val orderTPInfo = OrderTPInfo().apply {
             trnumOrder = request.order_info.tracking_number
             postalcodeDepart = request.order_info.origin_address.postalcode
@@ -58,6 +53,14 @@ class OrderService(
         }
         orderTPInfoRepository.save(orderTPInfo)
 
+        // Order 엔티티 생성 및 저장
+        val order = Order(
+            orderId = request.order_id,
+            trackingNumber = request.order_info.tracking_number,
+            containerNumber = request.container_id,
+            relay = request.relay
+        )
+        orderRepository.save(order)
         // 발송인, 수취인 정보 저장
         val contact = Contact().apply {
             idOrder = order
@@ -71,16 +74,16 @@ class OrderService(
             pcccDest = request.order_info.receiver.customs_id
         }
         contactRepository.save(contact)
+        // OrderTPInfo 엔티티 생성 및 저장
 
-        // Container 엔티티 생성 및 저장
-        val container = Container().apply {
-            containerId = request.container_id
-            this.order = order
+        // order, ordertpinfo 연결
+        val couplingOrdTr = CouplingOrdTr().apply {
+            this.idOdr = order
+            this.idTr = orderTPInfo
         }
-        containerRepository.save(container)
+        couplingOrdTrRepository.save(couplingOrdTr)
 
         return OrderCreateResponseDto(message = "주문 생성 완료")
-
     }
 
     // order_id로 주문 검색
@@ -134,91 +137,64 @@ class OrderService(
 
     // 변경한 운송현황 값 DB에 갖다넣기
     @Transactional
-    fun updateShipmentStatus(
-        orderId: String,
-        currentStatus: String?,
-        remarks: String?,
-        transportVehicleNum: String?
-    ): Boolean {
-        val shipmentStatus = shipmentStatusRepository.findByStatusId(orderId)
-            ?: throw IllegalArgumentException("해당 주문 ID에 대한 운송 상태가 없습니다.")
+    fun updateShipmentStatus(dto: ShipmentStatusDtoSearch): Boolean {
+        val order = orderRepository.findByOrderId(dto.order_id!!) ?: throw IllegalArgumentException("해당 주문 ID가 없습니다.")
+        val allStatuses = order.shipmentStatuses
+        val recentStatus = allStatuses.maxByOrNull { it.statusId?.toIntOrNull() ?: 0 }
+//        // statusId가 가장 큰 값에서 1을 더해 새 Id를 생성
+//        val newStatusId = recentStatus?.statusId?.toIntOrNull()?.plus(1) ?: 1
 
-        shipmentStatus.apply {
-            this.currentStatus = currentStatus ?: this.currentStatus // null이면 기존 값 유지
-            this.lastUpdated = Instant.now() // 자동 업데이트
-            this.remarks = remarks ?: this.remarks
-            this.transportVehicleNum = transportVehicleNum ?: this.transportVehicleNum
+        val newStatus = ShipmentStatus().apply {
+            statusId = dto.status_id
+            this.order = order
+            currentLocation = dto.current_location ?: recentStatus?.currentLocation // null이면 기존 값 유지
+            currentStatus = dto.current_status ?: recentStatus?.currentStatus // null이면 기존 값 유지
+            lastUpdated = Instant.now() // 자동 업데이트
+            remarks = dto.remarks
+            transportVehicleNum = dto.transport_vehicle_num ?: recentStatus?.transportVehicleNum
         }
 
-        shipmentStatusRepository.save(shipmentStatus)
+        shipmentStatusRepository.save(newStatus)
         return true
     }
 
-    fun parseOrderRequest(orderRequest: Map<String, Any?>): Order {
+/*    fun parseOrderRequest(orderRequest: Map<String, Any?>): Order {
         val order = Order()
         //todo : shipping info extraction
         //todo : Order Table data extraction
         //todo : return data
         return order
-    }
+    }*/
 
-//    fun getOrderDetails(orderId: String): OrderDetailDto? {
-//        val order = orderRepository.findById(orderId).orElse(null)
-//        val container = containerRepository.findByContainerId(order.containerNumber ?: throw IllegalArgumentException("Container number not found"))
-//        val items = itemRepository.findByContainer(container) ?: throw IllegalArgumentException("Items not found")
-//        val item = items.firstOrNull()
-//        // ship = shipmentStatusRepository.findByOrderId(orderId)
-//        val ship = order?.shipmentStatuses ?: throw Exception()
-//        val tp = transportInfoRepository.findByContainer(order.containerNumber ?: throw IllegalArgumentException("Tracking number not found"))
-//        // findByContainerId로 수정
-//        val contact = ContactRepository.findByIdOrder(order).orElse(null)
-//
-//        return OrderDetailDto(
-//            orderId = order.orderId ?: "",
-//            nameDepart = contact?.nameDepart ?: "",
-//            userId = contact.id ?: "",
-//            weight = item?.weight ?: 0.0,
-//            hsCode = item?.hsCode?: "",
-//            itemName = item?.name ?: "",
-//            price = item?.price?.toInt() ?: 0,
-//            originAddress = tp?.originAddress ?: "",
-//            destinationAddress = tp?.destinationAddress ?: "",
-//            trackingNumber = order.trackingNumber ?: "",
-//            estimatedArrivalTime = tp?.estimatedArrivalTime ?: Instant.now(),
-//            deliveryStatus = ship.map { status ->
-//                DeliveryStatusDto(
-//                    statusId = status.statusId ?:"",
-//                    remarks = status.remarks ?: "",
-//                    lastUpdated = status.lastUpdated ?: Instant.now()
-//                )
-//            }
-//        )
+    fun getOrderDetails(orderId: String): OrderDetailDto? {
+        val order = orderRepository.findById(orderId).orElse(null)
+        val container = order.containerNumber?.let { containerRepository.findByContainerId(it) }
+        val items = container?.let { itemRepository.findByContainer(it) }
+        val tpinfos = container?.let { transportInfoRepository.findAllByContainer(it) }
+        val ship = order?.shipmentStatuses ?: throw Exception()
+        val contact = contactRepository.findByIdOrder(order)
+        val insurances = insurenceRepository.findByOrder(order)
+        val customs = customsInfoRepository.findByOrder(order)
 
-//        return order?.let {
-//            OrderDetailDto(
-//                orderId = it.orderId ?: "",
-//                nameDepart = contact?.nameDepart ?: "",
-//                userId = contact.id ?: "",
-//                weight = item?.weight ?: 0.0,
-//                hsCode = item?.hsCode?: "",
-//                itemName = item?.name ?: "",
-//                price = item?.price?.toInt() ?: 0,
-//                originAddress = tp?.originAddress ?: "",
-//                destinationAddress = tp?.destinationAddress ?: "",
-//                trackingNumber = it.trackingNumber ?: "",
-//                estimatedArrivalTime = tp?.estimatedArrivalTime ?: Instant.now(),
-//                deliveryStatus = ship.map { status ->
-//                    DeliveryStatusDto(
-//                        statusId = status.statusId ?:"",
-//                        remarks = status.remarks ?: "",
-//                        lastUpdated = status.lastUpdated ?: Instant.now()
-//                    )
-//                }
-//            )
-//        }
-//   }
+        //order로 CouplingOrdTr 찾기
+        val couplingOrderTransportInfo = couplingOrdTrRepository.findByOrder(order)
+        //order 에서 OrderTPInfo 찾기
+        val OrderTR = couplingOrderTransportInfo?.idTr
 
-
+        return OrderDetailDto(
+            order_id = order.orderId ?: "",
+            name_depart = contact?.nameDepart ?:      "",
+            items = items!!,
+            transportInfos = tpinfos!!,
+            delivery_status = ship,
+            origin_address = OrderTR?.addressDepart ?: "",
+            destination_address = OrderTR?.addressDest!!,
+            tracking_number = order.trackingNumber !!,
+            estimated_arrival_time = OrderTR.estimatedArrivalTime,
+            insurances = insurances,
+            customs = customs,
+        )
+   }
 
 
 }

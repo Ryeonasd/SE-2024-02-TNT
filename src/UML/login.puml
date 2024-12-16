@@ -1,7 +1,0 @@
-@startuml
-actor User
-control UserController
-participant "UserService"
-participant "UserRepository"
-database "User" as UserDB
-@enduml

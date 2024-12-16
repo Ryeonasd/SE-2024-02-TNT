@@ -1,5 +1,4 @@
 package TNT.SE_2024_02_TNT.dto
-import TNT.SE_2024_02_TNT.dto.ItemDto
 
 data class MessageDto(
     val relay: Relay?,
@@ -55,18 +54,25 @@ data class UserDto(
 data class InsuranceInfoDto(
     val company: String?,
     val policy_number: String?,
-    val coverage_amount: Int?,
+    val coverage_amount: Double?,
     val coverage_scope: String?,
     val start_date: String?,
     val end_date: String?,
-    val premium: Int?
+    val premium: Double?
 )
-
+data class InsuranceInfoRequestDto(
+    val order_id : String,
+    val insurance_info : InsuranceInfoDto
+)
 data class CustomsInfoDto(
-    val duty_amount: Int?,
+    val duty_amount: Double?,
     val fta_applicable: Boolean?,
     val payment_method: String?,
-    //val customs_declaration_number: String?
+    val customs_declaration_number: String?
+)
+data class CustomsInfoRequestDto(
+    val order_id : String,
+    val customs_info : CustomsInfoDto
 )
 
 data class ShipmentStatusDto(

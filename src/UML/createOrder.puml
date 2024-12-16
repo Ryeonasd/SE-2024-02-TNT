@@ -1,7 +1,16 @@
 @startuml
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+actor User
+control OrderController
+participant OrderService
+database Orders
+database contact
+database OrderTPInfo
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+User -> OrderController: "/order/create": post
+OrderController -> OrderService: createOrder()
+OrderService -> Orders: saveOrder()
+Orders -> contact: saveContact()
+Orders -> OrderTPInfo: saveOrderTPInfo()
+OrderService -> User: orderCreated(orderId)
+
 @enduml

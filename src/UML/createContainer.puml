@@ -1,0 +1,13 @@
+@startuml
+actor User
+control ItemController
+participant ItemService
+database Containers
+
+
+User -> ItemController: "api not decleared": post
+ItemController -> ItemService: createContainer()
+ItemService -> Containers: saveContainer()
+ItemService -> User: containerCreated(containerID)
+
+@enduml
