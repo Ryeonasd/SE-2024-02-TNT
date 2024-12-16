@@ -1,14 +1,13 @@
 package TNT.SE_2024_02_TNT.dto
 
-import TNT.SE_2024_02_TNT.entity.Order
 import java.time.Instant
 // 운송 현황 get 요청시에 사용되는 DTO
 data class ShipmentStatusDtoSearch(
-    val statusId : String?,
-    val order: Order,
-    val currentLocation: String?,
-    val currentStatus : String?,
-    val lastUpdated: Instant?,
+    val status_id : String?,
+    val order_id: String?,
+    val current_location: String?,
+    val current_status : String?,
+    val last_updated: Instant?,
     val remarks : String?,
-    val transportVehicleNum:String?
+    val transport_vehicle_num:String?
 )

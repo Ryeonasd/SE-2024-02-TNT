@@ -1,0 +1,15 @@
+@startuml
+
+actor User
+control OrderController
+participant OrderService
+database ShipmentStatus
+
+User -> OrderController: "/order/update": post(orderId, status)
+OrderController -> OrderService: updateDeliveryStatus(orderId, status)
+OrderService -> ShipmentStatus: updateDeliveryStatus(orderId)
+ShipmentStatus -> OrderService: updated
+OrderService -> User: updated
+
+
+@enduml

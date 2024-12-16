@@ -1,0 +1,14 @@
+@startuml
+
+actor User
+control OrderController
+participant OrderService
+database Order_Database
+
+User -> OrderController: "/order/list": get()
+OrderController -> OrderService: getOrderList()
+OrderService -> Order_Database: fetchAllOrders()
+Order_Database -> OrderService: allOrders(orderList)
+OrderService -> User: orderList(orderList)
+
+@enduml

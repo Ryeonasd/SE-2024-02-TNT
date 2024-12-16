@@ -24,7 +24,7 @@ class OrderController(var orderService: OrderService) {
     fun getOrderList(): ResponseEntity<Map<String, Any?>> {
         return try {
             val orderList = this.orderService.getAllOrderList()
-            return ResponseEntity(mapOf(
+            ResponseEntity(mapOf(
                 "message" to "요청 성공",
                 "orderList" to orderList
             ), HttpStatus.OK)
@@ -46,24 +46,21 @@ class OrderController(var orderService: OrderService) {
     }
 
     @GetMapping("/search")
-    fun searchOrder(
-        @RequestBody(required = false) orderId: String?,
-        @RequestBody(required = false) containerId: String?, httpSession: HttpSession
-    ): ResponseEntity<Map<String, Any?>> {
+    fun searchOrder(@RequestBody request: OrderDtoSearch ): ResponseEntity<Map<String, Any?>> {
         return try {
-            if (orderId == null && containerId == null) {
-                return ResponseEntity(
+            if (request.order_id == null && request.container_id == null) {
+                ResponseEntity(
                     mapOf(
                         "message" to "검색 값이 비어있습니다."
                     ), HttpStatus.BAD_REQUEST
                 )
             }
             var order: OrderDtoSearch? = null
-            if (orderId != null) {
-                order = orderService.searchOrderByOrderId(orderId)
+            if (request.order_id != null) {
+                order = orderService.searchOrderByOrderId(request.order_id)
             }
-            else if (containerId != null) {
-                order = orderService.searchOrderByContainerId(containerId)
+            else if (request.container_id != null) {
+                order = orderService.searchOrderByContainerId(request.container_id)
             }
             ResponseEntity(
                 mapOf(
@@ -75,22 +72,22 @@ class OrderController(var orderService: OrderService) {
             ResponseEntity(mapOf("error" to e.message), HttpStatus.BAD_REQUEST)
         }
     }
-    @GetMapping("/detail")
-    fun getOrderDetails(@RequestParam orderId: String): ResponseEntity<OrderDetailDto> {
-        val orderDetails = orderService.getOrderDetails(orderId)
-        return if (orderDetails != null) {
-            ResponseEntity.ok(orderDetails)
-        } else {
-            ResponseEntity.notFound().build()
-        }
-    }
 
+//    @GetMapping("/detail")
+//    fun getOrderDetails(@RequestParam orderId: String): ResponseEntity<OrderDetailDto> {
+//        val orderDetails = orderService.getOrderDetails(orderId)
+//        return if (orderDetails != null) {
+//            ResponseEntity.ok(orderDetails)
+//        } else {
+//            ResponseEntity.notFound().build()
+//        }
+//    }
 
-    // 운송 현황 가져오기 (GET 요청)
+    // 운송 현황 가져 오기 (GET 요청)
     @GetMapping("/statuslist")
-    fun getDeliveryStatusList(@RequestBody request: Map<String, String>): ResponseEntity<Any> {
+    fun getDeliveryStatusList(@RequestBody request: ShipmentStatusDtoSearch): ResponseEntity<Any> {
         return try {
-            val orderId = request["order_id"] ?: throw IllegalArgumentException("order_id는 필수입니다.")
+            val orderId = request.order_id ?: throw IllegalArgumentException("order_id는 필수입니다.")
 
             // 서비스에서 데이터 가져오기
             val shipmentStatusList = orderService.getShipmentStatusList(orderId)
@@ -109,7 +106,7 @@ class OrderController(var orderService: OrderService) {
             }
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                mapOf("message" to e.message)
+                mapOf("error" to e.message)
             )
         }
     }
@@ -122,7 +119,7 @@ class OrderController(var orderService: OrderService) {
             val currentStatus = request["current_status"] as? String ?: "processing"
             val lastUpdated = request["last_updated"] as? String ?: throw IllegalArgumentException("last_updated는 필수입니다.")
             val remarks = request["remarks"] as? String ?: ""
-            val transportId = request["배송수단 관련한 id값"] as? String ?: throw IllegalArgumentException("배송수단 관련한 id값은 필수입니다.")
+            val transportId = request["transport_vehicle_num"] as? String ?: throw IllegalArgumentException("배송수단 관련한 id값은 필수입니다.")
 
             // 서비스에서 데이터 업데이트
             orderService.updateShipmentStatus(currentStatus, lastUpdated, remarks, transportId)
@@ -135,18 +132,6 @@ class OrderController(var orderService: OrderService) {
                 mapOf("message" to "잘안됨: ${e.message}")
             )
         }
-    }
-
-    @PostMapping("/itemadd")
-    fun itemAssginController(@RequestBody itemAssignDtoRequest: ItemAssignDtoRequest): ResponseEntity<Map<String, Any>> {
-        for(data in itemAssignDtoRequest.data){
-            try {
-                orderService.itemAssignService(data)
-            } catch (e: Exception) {
-
-            }
-        }
-
     }
 
 }

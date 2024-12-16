@@ -33,8 +33,8 @@ open class Contact {
     open var phoneDest: String? = null
 
     @Column(name = "pccc_depart")
-    open var pcccDepart: Int? = null
+    open var pcccDepart: String? = null
 
     @Column(name = "pccc_dest")
-    open var pcccDest: Int? = null
+    open var pcccDest: String? = null
 }

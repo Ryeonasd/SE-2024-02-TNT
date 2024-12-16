@@ -3,22 +3,22 @@ package TNT.SE_2024_02_TNT.dto
 import java.time.Instant
 
 data class OrderDetailDto(
-    val orderId: String,
-    val nameDepart: String,
-    val userId: String,
+    val order_id: String,
+    val name_depart: String,
+    val user_id: String,
     val weight: Double,
-    val hsCode: String,
-    val itemName: String,
+    val hs_code: String,
+    val item_name: String,
     val price: Int,
-    val originAddress: String,
-    val destinationAddress: String,
-    val trackingNumber: String,
-    val estimatedArrivalTime: Instant,
-    val deliveryStatus: List<DeliveryStatusDto>
+    val origin_address: String,
+    val destination_address: String,
+    val tracking_number: String,
+    val estimated_arrival_time: Instant,
+    val delivery_status: List<DeliveryStatusDto>
 )
 
 data class DeliveryStatusDto(
-    val statusId: String,
+    val status_id: String,
     val remarks: String,
-    val lastUpdated: Instant
+    val last_updated: Instant
 )

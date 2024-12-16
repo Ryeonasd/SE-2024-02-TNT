@@ -1,20 +1,19 @@
 package TNT.SE_2024_02_TNT.dto
 
-import TNT.SE_2024_02_TNT.entity.OrderTPInfo
 
 data class OrderDtoRequest( //주문 생성 시 리퀘스트로 들어오는 데이터
     val relay: String?,
-    val orderId: String?,
-    val containerId: String?,
-    val pickupTime: String?,
-    val estimatedArrivalTime: String?,
-    val orderTPInfo: OrderTPInfo
+    val order_id: String?,
+    val container_id: String?,
+    val pickup_time: String?,
+    val estimated_arrival_time: String?,
+    val order_info: OrderInfo
 )
 
-data class OrderTPInfo(
-    val trackingNumber: String?,
-    val originAddress: Address,
-    val destinationAddress: Address,
+data class OrderInfo(
+    val tracking_number: String?,
+    val origin_address: Address,
+    val destination_address: Address,
     val sender: ContactInfo,
     val receiver: ContactInfo
 )
@@ -29,7 +28,7 @@ data class ContactInfo(
     val name: String?,
     val email: String?,
     val phone: String?,
-    val customsId: String?
+    val customs_id: String?
 )
 data class OrderCreateResponseDto(
     val message: String
