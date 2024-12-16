@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface CustomInfoRepository : JpaRepository<CustomsInfo, String> {
     fun findByCustomsId(customsId: String): CustomsInfo?
-    fun findByOrder(order: Order): MutableList<CustomsInfo>?
+    fun findByOrderNumber(order: Order): MutableList<CustomsInfo>?
 }

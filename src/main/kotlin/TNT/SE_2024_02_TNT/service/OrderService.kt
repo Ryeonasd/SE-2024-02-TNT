@@ -4,7 +4,6 @@ import TNT.SE_2024_02_TNT.dto.*
 import TNT.SE_2024_02_TNT.entity.*
 import TNT.SE_2024_02_TNT.repository.*
 import jakarta.transaction.Transactional
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -174,10 +173,10 @@ class OrderService(
         val ship = order?.shipmentStatuses ?: throw Exception()
         val contact = contactRepository.findByIdOrder(order)
         val insurances = insurenceRepository.findByOrder(order)
-        val customs = customsInfoRepository.findByOrder(order)
+        val customs = customsInfoRepository.findByOrderNumber(order)
 
         //order로 CouplingOrdTr 찾기
-        val couplingOrderTransportInfo = couplingOrdTrRepository.findByOrder(order)
+        val couplingOrderTransportInfo = couplingOrdTrRepository.findByIdOdr(order)
         //order 에서 OrderTPInfo 찾기
         val OrderTR = couplingOrderTransportInfo?.idTr
 

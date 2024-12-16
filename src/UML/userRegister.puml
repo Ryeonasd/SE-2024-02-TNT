@@ -1,0 +1,11 @@
+@startuml
+actor User
+control UserController
+participant "UserService"
+database "User" as UserDB
+
+User -> UserController: "/register": post()
+UserController -> UserService: registerUser()
+UserService -> UserDB: save()
+UserController -> User: good
+@enduml

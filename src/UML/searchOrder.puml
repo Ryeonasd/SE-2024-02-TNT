@@ -1,0 +1,18 @@
+@startuml
+
+actor User
+control OrderController
+participant OrderService
+database OrderDatabase
+
+User -> OrderController: "/order/search" GET (orderId, containerId)
+OrderController -> OrderService: searchOrder(orderId, containerId)
+alt Search by orderId or containerId
+    OrderService -> OrderDatabase: search(orderId, containerId)
+    OrderDatabase -> OrderService: found order list
+    OrderService -> User: response("요청 성공", orderList)
+else No matching orders
+    OrderService -> User: response("찾는 주문 정보가 없습니다.")
+end
+
+@enduml
